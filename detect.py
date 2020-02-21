@@ -14,7 +14,7 @@ def detect(save_img=False):
     # Initialize
     device = torch_utils.select_device(device='cpu' if ONNX_EXPORT else opt.device)
     if os.path.exists(out):
-        shutil.rmtree(out)  # delete output folder
+        shutil.rmtree(out)  # 删除输出文件夹
     os.makedirs(out)  # make new output folder
 
     # Initialize model
@@ -75,9 +75,9 @@ def detect(save_img=False):
 
     # Run inference
     t0 = time.time()
-    for path, img, im0s, vid_cap in dataset:
+    for path, img, im0s, vid_cap in dataset:#path为资源位置
         t = time.time()
-
+        my_source=path
         # Get detections
         img = torch.from_numpy(img).to(device)
         if img.ndimension() == 3:
@@ -107,40 +107,37 @@ def detect(save_img=False):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
 
-                # Print results
+                # 命令行的输出
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += '%g %ss, ' % (n, names[int(c)])  # add to string
 
-                # Write results
+                # 每一次执行都将框框，置信度打在图片上
                 for *xyxy, conf, cls in det:
                     if save_txt:  # Write to file
                         with open(save_path + '.txt', 'a') as file:
                             file.write(('%g ' * 6 + '\n') % (*xyxy, cls, conf))
-
                     if save_img or view_img:  # Add bbox to image
                         label = '%s %.2f' % (names[int(cls)], conf)
                         plot_one_box(xyxy, im0, label=label, color=colors[int(cls)])
-
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, time.time() - t))
-
             # Stream results
             if view_img:
                 cv2.imshow(p, im0)
                 if cv2.waitKey(1) == ord('q'):  # q to quit
                     raise StopIteration
-
+            cv2.imwrite('prid.jpg',im0)
             # Save results (image with detections)
             if save_img:
                 if dataset.mode == 'images':
-                    cv2.imwrite(save_path, im0)
+                    cv2.imwrite(save_path, im0)#图片的输出
                 else:
-                    if vid_path != save_path:  # new video
+                    if vid_path != save_path: #前后两张图片位置不一样
                         vid_path = save_path
                         if isinstance(vid_writer, cv2.VideoWriter):
-                            vid_writer.release()  # release previous video writer
-
+                            vid_writer.release()  # 释放之前的资源
+                        
                         fps = vid_cap.get(cv2.CAP_PROP_FPS)
                         w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                         h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))

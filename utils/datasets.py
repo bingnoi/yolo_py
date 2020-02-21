@@ -171,10 +171,9 @@ class LoadWebcam:  # for inference
         assert ret_val, 'Camera Error %s' % self.pipe
         img_path = 'webcam.jpg'
         print('webcam %g: ' % self.count, end='')
-
+        print('camera')
         # Padded resize
         img = letterbox(img0, new_shape=self.img_size)[0]
-
         # Convert
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
         img = np.ascontiguousarray(img, dtype=np.float16 if self.half else np.float32)  # uint8 to fp16/fp32
@@ -196,13 +195,13 @@ class LoadStreams:  # multiple IP or RTSP cameras
             with open(sources, 'r') as f:
                 sources = [x.strip() for x in f.read().splitlines() if len(x.strip())]
         else:
-            sources = [sources]
+            sources = [sources]#rtsp流媒体
 
         n = len(sources)
         self.imgs = [None] * n
         self.sources = sources
-        for i, s in enumerate(sources):
-            # Start the thread to read frames from the video stream
+        for i, s in enumerate(sources):##读取视频
+            # Start the thread to read frames from the stream 
             print('%g/%g: %s... ' % (i + 1, n, s), end='')
             cap = cv2.VideoCapture(0 if s == '0' else s)
             assert cap.isOpened(), 'Failed to open %s' % s
